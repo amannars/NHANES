@@ -1,0 +1,138 @@
+---
+title: "NHANES - Dr. McGee's version"
+author: "Aravind Mannarswamy"
+date: "12/4/2020"
+output: html_document
+---
+
+# Data File Downloads   
+
+```{r}
+library(RNHANES)
+
+#Download demographic data
+DEMO_I = nhanes_load_data("DEMO_I", "2015-2016", demographics = FALSE)
+write.csv(x = DEMO_I, file =  "DEMO_I.csv", row.names = FALSE)
+
+#Download albumin data
+ALB_CR_I = nhanes_load_data("ALB_CR_I", "2015-2016", demographics = FALSE)
+
+#Download smoking (cotinine) data
+COT_I = nhanes_load_data("COT_I", "2015-2016", demographics = FALSE)
+
+#Download Blood Pressure & Cholesterol (BPQ_I) data
+BPQ_I = nhanes_load_data("BPQ_I", "2015-2016", demographics = FALSE)
+
+#Download Blood Pressure measurement (BPX_I) data
+BPX_I = nhanes_load_data("BPX_I", "2015-2016", demographics = FALSE)
+
+#Download Body Measures (BMX_I) data
+BMX_I = nhanes_load_data("BMX_I", "2015-2016", demographics = FALSE)
+
+#dowload alcohol data
+ALQ_I = nhanes_load_data("ALQ_I", "2015-2016", demographics = FALSE)
+
+#dowload arsenic data
+UAS_I = nhanes_load_data("UAS_I", "2015-2016", demographics = FALSE)
+
+#Download arsenic total data
+UTAS_I = nhanes_load_data("UTAS_I", "2015-2016", demographics = FALSE)
+
+#dowload mercury data
+UHG_I = nhanes_load_data("UHG_I", "2015-2016", demographics = FALSE)
+
+#Download urine heavy metal data
+UMS_I = nhanes_load_data("UMS_I", "2015-2016", demographics = FALSE)
+```
+
+# Data Clean up
+
+## Demographic clean up 
+
+```{r}
+file_input <- "DEMO_I.csv"
+
+#read data file that has already downloaded from NHANES
+#SEQN - Respondent sequence number
+#RIAGENDR - Gender
+#RIDAGEYR - Age in years at screening
+#RIDRETH1 - Race/Hispanic origin
+#RIDRETH3 - Race/Hispanic origin w/ NH Asian
+#DMDEDUC2 - Education level - Adults 20+
+#DMDMARTL - Marital status
+#INDFMPIR - Ratio of family income to poverty
+demo_data <- read.csv(file=file_input, header=TRUE)
+
+#convert age to categorical variable
+age_cluster <- rep(3, times=length(demo_data$RIDAGEYR))
+age_cluster[demo_data$RIDAGEYR < 65] <- 2
+age_cluster[(demo_data$RIDAGEYR < 40) & (demo_data$RIDAGEYR >= 20)] <- 1
+
+#convert FIPR to categorical variable
+FIPR_cluster <- rep(3, times=length(demo_data$INDFMPIR))
+FIPR_cluster[demo_data$INDFMPIR < 1.50] <- 2
+FIPR_cluster[demo_data$INDFMPIR < 1.00] <- 1
+
+demo_data$age_cluster <- age_cluster
+demo_data$FIPR_cluster <- FIPR_cluster
+
+demo_data2 <- demo_data[,c(1,2,3,4,5,8,17,18,40,41,42,43,44,47,52,53)]
+
+#remove all rows with any NA values
+for (i in ncol(demo_data2)){    #ncol(demo_data)
+  keep <- !is.na(demo_data2[,i])
+  demo_data2 <- demo_data2[keep,]
+}
+
+
+#clean RIAGENDR - Gender data
+keep <- (demo_data2$RIAGENDR >= 1 & demo_data2$RIAGENDR <= 2)
+demo_data2 <- demo_data2[keep,]
+
+#clean RIDAGEYR - Age in years at screening
+keep <- (demo_data2$RIDAGEYR >= 20 & demo_data2$RIDAGEYR <= 80)
+demo_data2 <- demo_data2[keep,]
+
+#clean RIDRETH3 - Race/Hispanic origin w/ NH Asian
+keep <- (demo_data2$RIDRETH3 >= 1 & demo_data2$RIDRETH3 <= 7)
+demo_data2 <- demo_data2[keep,]
+
+#clan DMDEDUC2 - Education level - Adults 20+
+keep <- (demo_data2$DMDEDUC2 >= 1 & demo_data2$DMDEDUC2 <= 5)
+demo_data2 <- demo_data2[keep,]
+
+#clean DMDMARTL - Marital status
+keep <- (demo_data2$DMDMARTL >= 1 & demo_data2$DMDMARTL <= 6)
+demo_data2 <- demo_data2[keep,]
+
+#clean INDFMPIR - Ratio of family income to poverty
+keep <- (demo_data2$INDFMPIR >= 0 & demo_data2$INDFMPIR <= 5)
+demo_data2 <- demo_data2[keep,]
+
+write.csv(file="Cleaned demographic data.csv", x=demo_data2, row.names = FALSE)
+
+demo_data3 = demo_data %>%
+  filter(RIDAGEYR >= 20) %>% 
+  mutate(age_kmeans_cluster = (kmeans(x = RIDAGEYR,centers = 3)$cluster))
+
+demo_data3 %>%
+  select(RIDAGEYR, age_cluster, age_kmeans_cluster) %>% 
+  pivot_longer(cols = c(age_cluster, age_kmeans_cluster), names_to = 'cluster_type', values_to = "cluster") %>% 
+  ggplot()+
+  aes(x = RIDAGEYR, y = cluster, color = cluster_type)+
+  geom_jitter()
+```
+
+```{r}
+demo_data %>% 
+  filter(INDHHIN2 <= 25, INDFMIN2 <= 25) %>% 
+  ggplot()+
+  aes(x = INDHHIN2, y = INDFMIN2, color = INDFMPIR)+
+  geom_jitter()+
+  scale_color_viridis_c()
+```
+
+```{r}
+
+```
+

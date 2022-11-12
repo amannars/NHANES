@@ -1,0 +1,114 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(cache = TRUE,
+               cache.lazy = FALSE,
+               warning = FALSE,
+               message = FALSE,
+               echo = TRUE,
+               dpi = 180,
+               fig.width = 7,
+               fig.height = 5)
+library(tidyverse)
+library(tidymodels)
+library(magrittr)
+library(RNHANES)
+library(skimr)
+```
+
+
+# Extract Data   
+
+```{r}
+DEMO_I = nhanes_load_data("DEMO", "2015-2016", demographics = FALSE)
+COT_I = nhanes_load_data("COT", "2015-2016", demographics = FALSE)
+skim(DEMO_I)
+```
+
+
+
+# Preprocess Data    
+
+
+```{r}
+
+demo_df = DEMO_I %>% 
+  select(SEQN, SDDSRVYR, RIDSTATR, RIAGENDR, 
+         RIDAGEYR, RIDRETH3, DMQMILIZ, DMDBORN4, 
+         DMDCITZN, DMDEDUC2, DMDMARTL, DMDHSEDU,  
+         WTINT2YR, WTMEC2YR, INDFMPIR) %>% 
+  na.omit()
+
+demo_df %>% View()
+
+coti_df = COT_I %>% 
+  select(SEQN, LBXCOT, LBXHCT)
+
+demo_df %<>% 
+  left_join(coti_df)
+
+```
+
+
+```{r}
+library(corrr)
+corrr::correlate(demo_df %>% select(-WTINT2YR, -WTMEC2YR, - SEQN)) %>% 
+  rplot()+
+  theme(axis.text.x = element_text(angle = 90))
+
+```
+
+```{r}
+demo_model_data = demo_df %>% 
+  select(-WTINT2YR, -WTMEC2YR, - LBXHCT, -SDDSRVYR) %>% 
+  replace_na(list(LBXCOT=0, LBXHCT=0)) %>% 
+  filter(DMDCITZN %in% c(1,2)) %>% 
+  mutate_if(is.numeric, as.factor) %>% 
+  mutate(SEQN = as.character(SEQN),
+         RIDAGEYR = as.numeric(RIDAGEYR),
+         INDFMPIR = as.numeric(INDFMPIR),
+         LBXCOT = as.numeric(LBXCOT))
+
+str(demo_model_data)
+
+demo_df_splits = initial_split(data = demo_model_data)
+
+demo_train = training(demo_df_splits)
+
+demo_test = testing(demo_df_splits)
+
+```
+
+
+
+# Build a model   
+
+```{r}
+smoking_demo_rx = recipe(LBXCOT ~ . , data = demo_train) %>% 
+  update_role(SEQN, new_role = "ID") %>% 
+  step_dummy(RIDSTATR, RIAGENDR, RIDRETH3, DMQMILIZ, DMDBORN4, DMDCITZN, DMDEDUC2, DMDMARTL, DMDHSEDU) %>% 
+  step_normalize(RIDAGEYR)
+
+smoking_demo_rx %>% prep()
+
+ demo_model_data %>% 
+  names()
+
+linear_reg(mode = "regression",penalty = 0, mixture = 1)
+
+```
+
+```{r}
+demo_model_data %>% 
+  count(RIDAGEYR)
+```
+
+
+
+# Test and finalize the model   
+

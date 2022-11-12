@@ -1,0 +1,228 @@
+---
+title: "US Presidents"
+output: html_notebook
+---
+
+```{r}
+library(rvest)
+library(tidyverse)
+library(kableExtra)
+```
+
+
+undergraduate
+
+```{r}
+pres_ug_df = read_html("https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States_by_education") %>% 
+  html_nodes("table") %>% 
+  .[[1]] %>% 
+  html_table(fill = TRUE) %>% 
+  separate_rows(`President(s)`, sep = "\n") %>% 
+  separate(Location, sep = ",",c("City", "State")) %>% 
+  mutate(Division = 'UnderGraduate',
+         Status = ifelse(str_detect(string = `President(s)`, pattern = "withdrew") == TRUE, 
+                         "Withdrew", 
+                         ifelse(str_detect(string = `President(s)`, pattern = "transferred") == TRUE, 
+                                "Transferred", 
+                                "Graduated")),
+         President = gsub("\\s*\\([^\\)]+\\)","",as.character(`President(s)`)))
+
+
+```
+
+
+business school
+```{r}
+
+pres_bschool_df = read_html("https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States_by_education") %>% 
+  html_nodes("table") %>% 
+  .[[2]] %>% 
+  html_table(fill = TRUE) %>% 
+  separate_rows(`President(s)`, sep = "\n") %>% 
+  separate(Location, sep = ",",c("City", "State"))%>% 
+  mutate(Division = 'BusinessSchool',
+         Status = ifelse(str_detect(string = `President(s)`, pattern = "withdrew") == TRUE, 
+                         "Withdrew", 
+                         ifelse(str_detect(string = `President(s)`, pattern = "transferred") == TRUE, 
+                                "Transferred", 
+                                "Graduated")),
+         President = gsub("\\s*\\([^\\)]+\\)","",as.character(`President(s)`)))
+
+```
+
+
+grad school
+```{r}
+
+pres_gschool_df = read_html("https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States_by_education") %>% 
+  html_nodes("table") %>% 
+  .[[3]] %>% 
+  html_table(fill = TRUE) %>% 
+  separate_rows(`President(s)`, sep = "\n") %>% 
+  separate(Location, sep = ",",c("City", "State"))%>% 
+  mutate(Division = 'GraduateSchool',
+         Status = ifelse(str_detect(string = `President(s)`, pattern = "withdrew") == TRUE, 
+                         "Withdrew", 
+                         ifelse(str_detect(string = `President(s)`, pattern = "transferred") == TRUE, 
+                                "Transferred", 
+                                "Graduated")),
+         President = gsub("\\s*\\([^\\)]+\\)","",as.character(`President(s)`)))
+
+```
+
+
+med school
+
+```{r}
+
+pres_medschool_df = read_html("https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States_by_education") %>% 
+  html_nodes("table") %>% 
+  .[[4]] %>% 
+  html_table(fill = TRUE) %>% 
+  separate_rows(`President(s)`, sep = "\n") %>% 
+  separate(Location, sep = ",",c("City", "State"))%>% 
+  mutate(Division = 'MedSchool',
+         Status = ifelse(str_detect(string = `President(s)`, pattern = "withdrew") == TRUE, 
+                         "Withdrew", 
+                         ifelse(str_detect(string = `President(s)`, pattern = "transferred") == TRUE, 
+                                "Transferred", 
+                                "Graduated")),
+         President = gsub("\\s*\\([^\\)]+\\)","",as.character(`President(s)`)))
+
+```
+
+law school
+
+```{r}
+
+pres_lawschool_df = read_html("https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States_by_education") %>% 
+  html_nodes("table") %>% 
+  .[[5]] %>% 
+  html_table(fill = TRUE) %>% 
+  separate_rows(`President(s)`, sep = "\n") %>% 
+  separate(Location, sep = ",",c("City", "State"))%>% 
+  mutate(Division = 'LawSchool',
+         Status = ifelse(str_detect(string = `President(s)`, pattern = "posthumously") == TRUE, 
+                         "AwardedPostHumously", 
+                         ifelse(str_detect(string = `President(s)`, pattern = "withdrew") == TRUE, 
+                                "Withdrew", 
+                                ifelse(str_detect(string = `President(s)`, pattern = "did not") == TRUE, 
+                                       "DidNotGraduate", 
+                                       ifelse(str_detect(string = `President(s)`, pattern = "did not") == TRUE, 
+                                              "Transferred", 
+                                              "Graduated")))),
+         President = gsub("\\s*\\([^\\)]+\\)","",as.character(`President(s)`)))
+
+```
+
+
+```{r}
+president_college = pres_ug_df %>% 
+  bind_rows(pres_bschool_df) %>% 
+  bind_rows(pres_gschool_df) %>% 
+  bind_rows(pres_lawschool_df) %>% 
+  bind_rows(pres_medschool_df)
+
+```
+
+
+```{r}
+president_college %>% 
+  select(President, School, Division, Status) %>% 
+  arrange(President, School, Division, Status)
+```
+
+
+
+
+NFL Superbowl quarterbacks and their schools
+
+
+```{r}
+sbowl_win_qb_df = read_html("https://en.wikipedia.org/wiki/List_of_Super_Bowl_starting_quarterbacks") %>% 
+  html_nodes("table") %>% 
+  .[[2]] %>% 
+  html_table(fill = TRUE) %>%
+  select(1:4) %>% 
+  separate(`Winning QB`, sep = "\\*",c("QB", "State")) %>% 
+  mutate(QB = str_replace(string = QB, pattern = "MVP", replacement = "")) %>% 
+  head(-1) 
+
+```
+
+```{r}
+sbowl_win_qb_df$QB %>% unique()
+```
+
+```{r}
+qb = sbowl_win_qb_df$QB %>% unique()
+qb_schools = c("Alabama University", "Alabama University", 
+               "Purdue University", "University of Louisville", 
+               "United States Naval Academy","Purdue University",
+               "Louisiana Tech", "Alabama University",
+               "Stanford University", "University of Notre Dame",
+               "University of Notre Dame", "Brigham Young University",
+               "Morehead State University", "Grambling State University", 
+               "West Virginia University", "Washington State University", 
+               "Oklahoma University\nUCLA", "Brigham Young University", 
+               "University of Southern Mississippi",
+               "Stanford University", "University of Northern Iowa", 
+               "Fresno State", "University of Michigan",
+               "Florida State University","Miami University",
+               "University of Tennessee", "University of Mississippi", 
+               "Purdue University", "Butte College\nUniversity of California Berkeley",
+               "University of Pittsburgh\nUniversity of Delaware", 
+               "North Carolina State University\nUniversity of Wisconsin Madisson", 
+               "Michigan State University\nUniversity of Arizona", 
+               "Texas Tech University", "University of Georgia")
+
+qb_schools_df = data.frame(QB = qb, School = qb_schools) %>% 
+  separate_rows(School, sep = "\n") %>% 
+  left_join(sbowl_win_qb_df %>% 
+              group_by(QB) %>% 
+              summarize(Count = n(), .groups = 'drop'))
+```
+
+
+
+```{r}
+qb_schools_order = qb_schools_df %>% 
+  group_by(School) %>% 
+  summarize(SuperBowls = sum(Count), .groups = 'drop') %>% 
+  arrange(-SuperBowls) %>% 
+  filter(SuperBowls > 1) %>% 
+  pull(School)
+
+qb_schools_df %>% 
+  group_by(School, QB) %>% 
+  summarize(SuperBowls = sum(Count), .groups = 'drop') %>% 
+  arrange(-SuperBowls) %>% 
+  mutate(School = factor(x = School, levels = qb_schools_order, ordered = TRUE)) %>% 
+  na.omit() %>% 
+  ggplot()+
+  aes(x = SuperBowls, y = School, color = QB, fill = QB)+
+  geom_col(position = "stack", alpha = 0.25)+
+  theme_bw()+
+  theme(panel.grid = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title = element_blank())+
+  ggtitle(label = "Schools that produced SuperBowl winning QB", "Only Purdue and Alabama has produced 3 different QB")
+
+```
+
+```{r}
+both_schools = president_college$School[president_college$School %in% qb_schools_df$School]
+```
+
+
+```{r}
+for(i in both_schools){
+  print(i)
+  print("Presidents:")
+  president_college %>% filter(School == i) %>% pull(President) %>% unique() %>% print()
+  print("Superbowl Winning Quarterbacks:")
+  qb_schools_df %>% filter(School == i) %>% pull(QB) %>% unique() %>% print()
+  print("---------------------------------")
+}
+```
+

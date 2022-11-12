@@ -1,0 +1,175 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Steps:  
+0. Load the libraries  
+1. Load the data    
+2. 
+
+
+
+```{r}
+library(tidymodels)
+library(magrittr)
+library(tidyverse)
+```
+
+
+```{r}
+df = read.csv(file = "./disease_data.csv", header = TRUE, stringsAsFactors = FALSE) %>% 
+  select(-WTSA2YR, -Response) %>% 
+  mutate(SDMVPSU = as.factor(SDMVPSU), 
+         RIAGENDR = as.factor(RIAGENDR), 
+         RIDRETH3 = as.factor(RIDRETH3),
+         DMDEDUC2 =as.factor(DMDEDUC2), 
+         DMDMARTL = as.factor(DMDMARTL), 
+         age_cluster = as.factor(age_cluster),
+         FIPR_cluster = as.factor(FIPR_cluster),
+         BMI_category = as.factor(BMI_category),
+         disease = as.factor(disease))
+
+df %>% str()
+```
+
+
+```{r}
+skimr::skim(df)
+```
+
+
+```{r}
+# notice the class imbalance  
+
+df %>% 
+  count(disease) %>% 
+  mutate(prop = n / nrow(df))
+```
+
+Only 8% of the people have disease.   
+
+```{r}
+disease_split = initial_split(data = df, strata = disease)
+disease_split
+```
+
+```{r}
+disease_train = training(disease_split)
+disease_train
+disease_train %>% 
+  count(disease) %>% 
+  mutate(prop = n / nrow(disease_train))
+disease_test = testing(disease_split)
+disease_test
+disease_test %>% 
+  count(disease) %>% 
+  mutate(prop = n / nrow(disease_test))
+```
+
+
+```{r}
+# Resampling techniques    
+disease_folds = vfold_cv(disease_train, strata = disease)
+disease_folds
+
+```
+
+
+```{r}
+library(themis)
+```
+
+```{r}
+str(df)
+disease_rec = recipe(disease ~. , data = disease_train) %>% 
+  add_role(SEQN,new_role =  "id") %>%  
+  step_dummy(SDMVPSU,
+            RIAGENDR,
+            RIDRETH3,
+            DMDEDUC2,
+            DMDMARTL,
+            age_cluster ,
+            FIPR_cluster,
+            BMI_category) %>% 
+  step_smote(disease)
+
+disease_rec
+
+bake(disease_rec %>% prep(), new_data = NULL) %>% 
+  count(disease)
+
+bake(disease_rec %>% prep(), new_data = disease_train) %>% 
+  count(disease)
+
+```
+
+
+```{r}
+glm_spec = logistic_reg() %>% 
+  set_engine("glm")
+
+glm_spec
+```
+
+
+
+```{r}
+rf_spec = rand_forest(trees = 1000) %>% 
+  set_mode("classification") %>% 
+  set_engine("ranger")
+rf_spec  
+```
+
+
+
+```{r}
+disease_wf = workflow() %>% 
+  add_recipe(disease_rec)
+disease_wf
+```
+
+
+```{r}
+disease_metrics = metric_set(roc_auc, accuracy, sensitivity, specificity)
+doParallel::registerDoParallel()
+
+```
+
+
+```{r}
+glm_rs = disease_wf %>% 
+  add_model(glm_spec) %>% 
+  fit_resamples(resamples = disease_folds,
+                metrics = disease_metrics,
+                control = control_resamples(verbose = TRUE, save_pred = TRUE))
+
+glm_rs
+```
+
+```{r}
+rf_rs = disease_wf %>% 
+  add_model(rf_spec) %>% 
+  fit_resamples(resamples = disease_folds,
+                metrics = disease_metrics,
+                control = control_resamples(verbose = TRUE, save_pred = TRUE))
+rf_rs
+```
+
+
+```{r}
+collect_metrics(glm_rs)
+glm_rs %>% 
+  conf_mat_resampled()
+
+```
+
+
+```{r}
+collect_metrics(rf_rs)
+rf_rs %>% 
+  conf_mat_resampled()
+```
+
+
+

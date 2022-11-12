@@ -1,0 +1,21 @@
+dir1 <- "~/Desktop/Hypertension study/00 - Final R Programs/02 - Data cleanup/Individual Programs/"
+
+file1 <- paste(dir1,"Alcohol data clean-up.R",sep="")
+file2 <- paste(dir1,"Arsenic data clean-up.R",sep="")
+file3 <- paste(dir1,"Blood pressure data clean-up.R",sep="")
+file4 <- paste(dir1,"Blood pressure questionaire data clean-up.R",sep="")
+file5 <- paste(dir1,"BMI data clean-up.R",sep="")
+file6 <- paste(dir1,"Cotinine data clean-up.R",sep="")
+file7 <- paste(dir1,"Creatinine data clean-up.R",sep="")
+file8 <- paste(dir1,"Demographic data clean-up.R",sep="")
+file9 <- paste(dir1,"Heavy metal clean-up.R",sep="")
+
+source(file=file1)
+source(file=file2)
+source(file=file3)
+source(file=file4)
+source(file=file5)
+source(file=file6)
+source(file=file7)
+source(file=file8)
+source(file=file9)

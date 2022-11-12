@@ -1,0 +1,152 @@
+---
+title: "The tale of p-values"
+output: html_notebook
+---
+
+
+
+
+
+```{r}
+library(dplyr)
+library(survey)
+library(viridis)
+library(aod)
+library(InformationValue)
+```
+
+
+```{r}
+build_model_data <- function(base_model, response){
+  model_data <- merge(base_model, response, 
+                      by.x="SEQN", by.y="SEQN", all=FALSE)
+  keep <- !is.na(model_data[,ncol(model_data)])
+  model_data <- model_data[keep,]
+  #declare variables as factors as needed
+  #demographic factors
+  model_data$RIAGENDR <- as.factor(model_data$RIAGENDR)
+  model_data$RIDRETH3 <- as.factor(model_data$RIDRETH3)
+  model_data$DMDEDUC2 <- as.factor(model_data$DMDEDUC2)
+  model_data$DMDMARTL <- as.factor(model_data$DMDMARTL)
+  model_data$age_cluster <- as.factor(model_data$age_cluster)
+  model_data$FIPR_cluster <- as.factor(model_data$FIPR_cluster)
+  
+  #body mass index
+  model_data$BMI_category <- as.factor(model_data$BMI_category)
+  
+  #cotinine
+  model_data$LBDCOTLC <- as.factor(model_data$LBDCOTLC)
+  
+  #alcohol consumption
+  model_data$ALQ101 <- as.factor(model_data$ALQ101)
+  return(model_data)
+}
+```
+
+
+```{r}
+dir1 <- "./PAH simplified/Cleaned Data Files/"
+
+#input cleaned NHANES data files
+setwd(dir1)
+CKD <- read.csv(file="Cleaned CKD data.csv", header=TRUE)
+CKD <- select(CKD, SEQN, kidney_disease)
+
+HBP <- read.csv(file="Cleaned hypertension data.csv", header=TRUE)
+HBP <- select(HBP, SEQN, hypertension)
+
+DEP <- read.csv(file="Cleaned depression data.csv", header=TRUE)
+DEP <- select(DEP, SEQN, Depressed)
+
+BMI_data <- read.csv(file="Cleaned BMI data.csv", header=TRUE)
+BMI_data <- select(BMI_data, SEQN, BMI_category)
+
+cotinine_data <- read.csv(file="Cleaned cotinine data.csv", header=TRUE)
+cotinine_data <- select(cotinine_data, SEQN, LBXCOT, LBDCOTLC)
+
+demographic <- read.csv(file="Cleaned demographic data.csv", header=TRUE)
+demographic <- select(demographic, SEQN, SDMVPSU, SDMVSTRA, RIAGENDR, RIDRETH3, 
+                      DMDEDUC2, DMDMARTL, age_cluster, FIPR_cluster)
+
+alcohol_data <- read.csv(file="Cleaned alcohol data.csv", header=TRUE)
+alcohol_data <- select(alcohol_data, SEQN, ALQ101)
+
+PAH <- read.csv(file="Cleaned PAH data.csv", header=TRUE)
+
+
+```
+
+
+
+```{r}
+
+setwd(dir1)
+
+for (i_disease in 1:3){
+  if (i_disease == 1){
+    base_model10 <- merge(CKD, demographic, by.x="SEQN", by.y="SEQN", all=FALSE)
+  } else if (i_disease == 2){
+    base_model10 <- merge(HBP, demographic, by.x="SEQN", by.y="SEQN", all=FALSE)
+  } else if (i_disease == 3){
+    base_model10 <- merge(DEP, demographic, by.x="SEQN", by.y="SEQN", all=FALSE)
+  }
+  
+  colnames(base_model10)[2] <- "disease"
+  base_model11 <- merge(base_model10, BMI_data, by.x="SEQN", by.y="SEQN", all=FALSE)
+  base_model12 <- merge(base_model11, cotinine_data, by.x="SEQN", by.y="SEQN", all=FALSE)
+  covariate_data <- merge(base_model12, alcohol_data, by.x="SEQN", by.y="SEQN", all=FALSE)
+
+
+  for (i in 1:2){
+    cat("\n\n i=",i,"\n")
+    response <- PAH[,c(1,2,(2*i+1))]
+    col_names <- colnames(response)
+    print(paste("Response factor = ",col_names[3]))
+    col_names[3] <- "Response"
+    colnames(response) <- col_names
+    print("OK1")
+    model_data <- build_model_data(base_model=covariate_data, response=response)
+    base_survey <- svydesign(data=model_data, id=~SDMVPSU, strata=~SDMVSTRA, 
+                             weights=~WTSA2YR, nest=TRUE)
+    
+    cat("\nN = ",nrow(model_data),"\n\n")
+    logit_model <- svyglm(disease ~ 
+                            log10(Response) + 
+                            RIAGENDR + RIDRETH3 + DMDEDUC2 + DMDMARTL + 
+                            age_cluster + FIPR_cluster + BMI_category + LBDCOTLC + ALQ101,
+                          family = quasibinomial(),
+                          data   = model_data,
+                          design = base_survey)
+    print(data.frame(coef(logit_model), confint(logit_model, level=0.95)))
+  }
+}
+```
+
+
+```{r}
+degf(base_survey)
+```
+
+
+```{r}
+SE(logit_model)
+```
+
+
+```{r}
+summary(object = logit_model, df = degf(base_survey))$coefficients %>% 
+  as_tibble() %>%
+  cbind(coefficient_term = rownames(confint(logit_model, level=0.95))) %>% 
+  left_join(confint(logit_model, level=0.95) %>% as_tibble() %>% cbind(coefficient_term = rownames(confint(logit_model, level=0.95))))
+```
+
+
+```{r}
+disease_data = model_data %>%
+  mutate_if(is.factor, as.numeric)
+
+write.csv(x = disease_data, file = "disease_data.csv", row.names = FALSE)
+```
+
+
+

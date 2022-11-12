@@ -1,0 +1,131 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(cache = TRUE,
+               cache.lazy = FALSE,
+               warning = FALSE,
+               message = FALSE,
+               echo = TRUE,
+               dpi = 180,
+               fig.width = 7,
+               fig.height = 5)
+library(tidyverse)
+library(tidymodels)
+library(magrittr)
+library(RNHANES)
+library(skimr)
+```
+
+
+```{r}
+DEMO_I = nhanes_load_data("DEMO", "2015-2016", demographics = FALSE)
+
+DEMO_I %<>% 
+  select(SEQN, SDDSRVYR, RIDSTATR, RIAGENDR, 
+         RIDAGEYR, RIDRETH3, DMDEDUC2, DMDMARTL, 
+         DMDHSEDU,  WTINT2YR, WTMEC2YR, SDMVPSU, 
+         SDMVSTRA, INDFMPIR)
+
+ALQ_I = nhanes_load_data("ALQ_I", "2015-2016", demographics = FALSE)
+
+ALQ_data = DEMO_I %>% 
+  left_join(ALQ_I %>% select(SEQN, ALQ130), by = "SEQN")
+
+ALQ_data %<>% 
+  mutate(ALQ130 = ifelse(is.na(ALQ130),0,ALQ130))
+
+ALQ_data %<>% 
+  drop_na() %>% 
+  select(-SEQN,-WTINT2YR, -WTMEC2YR)
+
+```
+
+# Explore the data   
+
+```{r}
+ALQ_data %>% 
+  gather(key = "variable",value = "value",-ALQ130) %>% 
+  ggplot(aes(x = value, y = ALQ130, color = variable))+
+  geom_jitter()+
+  facet_wrap(~variable)
+  
+```
+
+```{r}
+set.seed(46)
+alc_split = initial_split(ALQ_data,prop = 0.8, strata = ALQ130)
+alc_train = training(alc_split)
+alc_test = testing(alc_split)
+alc_cv_folds = vfold_cv(data = alc_train, strata = ALQ130)
+alc_boots = bootstraps(data = alc_train, strata = ALQ130)
+
+# alc_cv_folds$splits
+# alc_boots$splits
+```
+
+```{r}
+library(usemodels)
+use_ranger(formula = ALQ130 ~. , data = alc_train)
+```
+ 
+```{r}
+ranger_recipe <- 
+  recipe(formula = ALQ130 ~ ., data = alc_train) 
+
+ranger_spec <- 
+  rand_forest(mtry = tune(), min_n = tune(), trees = 1000) %>% 
+  set_mode("regression") %>% 
+  set_engine("ranger") 
+
+ranger_workflow <- 
+  workflow() %>% 
+  add_recipe(ranger_recipe) %>% 
+  add_model(ranger_spec) 
+
+set.seed(6942)
+
+doParallel::registerDoParallel()
+t1 = Sys.time()
+ranger_tune <-
+  tune_grid(ranger_workflow, 
+            resamples = alc_cv_folds, 
+            grid = 10)
+t2 = Sys.time()
+t2-t1
+```
+
+```{r}
+autoplot(ranger_tune)
+```
+
+```{r}
+final_rf = ranger_workflow %>% 
+  finalize_workflow(select_best(ranger_tune))
+final_rf
+```
+
+
+```{r}
+alc_fit = last_fit(object = final_rf,alc_split)
+alc_fit$.predictions
+```
+
+
+```{r}
+collect_metrics(alc_fit)
+```
+
+
+```{r}
+collect_predictions(x = alc_fit) %>% 
+  ggplot(aes(x = ALQ130,y = .pred))+
+  geom_point()+
+  geom_smooth()+
+  geom_abline(lty = 2)+
+  scale_y_continuous(limits = c(0,10))
+```
+

@@ -1,0 +1,62 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(dplyr)
+library(survey)
+library(viridis)
+#library(InformationValue)
+#library(plot3D)
+
+#input cleaned NHANES data files for covariates
+CKD <- read.csv(file="Cleaned_kidney_disease_data.csv", header=TRUE)
+demographic <- read.csv(file="Cleaned_demographic_data.csv", header=TRUE)[,-16]
+```
+
+
+```{r}
+#Kidney disease
+base_model10 <- merge(CKD, demographic, by.x="SEQN", by.y="SEQN", all=FALSE)
+#sink(file="CKD Covariate Logit Models.txt")
+colnames(base_model10)[2] <- "disease"
+
+#declare variables as factors as needed
+base_model10$RIAGENDR <- as.factor(base_model10$RIAGENDR)  #gender
+base_model10$RIDRETH3 <- as.factor(base_model10$RIDRETH3)  #ethnicity
+base_model10$DMDEDUC2 <- as.factor(base_model10$DMDEDUC2)  #education
+base_model10$DMDMARTL <- as.factor(base_model10$DMDMARTL)  #marital status
+base_model10$age_cluster <- as.factor(base_model10$age_cluster)  #age
+base_model10$FIPR_cluster <- as.factor(base_model10$FIPR_cluster)  #FIPR
+base_model10$BMI_category <- as.factor(base_model10$BMI_category)  #body mass index data
+base_model10$LBDCOTLC <- as.factor(base_model10$LBDCOTLC)  #cotinine
+base_model10$ALQ101 <- as.factor(base_model10$ALQ101)  #alcohol consumption
+
+#Create a survey design object
+base_survey <- svydesign(data=base_model10, id=~SDMVPSU, strata=~SDMVSTRA, 
+                         weights=~WTINT2YR, nest=TRUE)
+
+#Main-effects model
+logit_model1 <- lm(disease ~ RIDRETH3, 
+                       family = binomial(),
+                       data   = base_model10)
+                       #design = base_survey)
+print(summary(logit_model1))
+
+library(multcompView)
+ANOVA1 <- aov(logit_model1)
+print(ANOVA1)
+TUKEY <- TukeyHSD(ANOVA1, which = 'RIDRETH3', conf.level=0.95)
+
+#str(ANOVA1)
+print(TUKEY)
+```
+
+
+```{r}
+TukeyHSD(aov(glm(disease ~ RIDRETH3, data = base_model10,family = "binomial")))
+```
+

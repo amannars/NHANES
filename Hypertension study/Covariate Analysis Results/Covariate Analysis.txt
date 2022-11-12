@@ -1,0 +1,423 @@
+
+
+By Sex
+Joining, by = "RIAGENDR"
+  RIAGENDR counts hypertension         se
+1        1   2005    0.5279448 0.01980378
+2        2   2097    0.4629031 0.01410747
+[1] 0.02758829
+
+
+By Race/Ethnicity
+Joining, by = "RIDRETH3"
+  RIDRETH3 counts hypertension         se
+1        1    724    0.4259694 0.02776815
+2        2    525    0.4130805 0.02719141
+3        3   1469    0.4992225 0.01479935
+4        4    815    0.5722952 0.01629573
+5        6    419    0.4574143 0.03063926
+6        7    150    0.5193740 0.08074219
+[1] 0.7562447
+
+
+Pairwise comparisons
+ 0.7543906 	Mexican American & Other Hispanic
+ 0.0409091 	Mexican American & Non-Hispanic White
+ 0.0001638676 	Mexican American & Non-Hispanic Black
+ 0.4745616 	Mexican American & Non-Hispanic Asian
+ 0.3036332 	Mexican American & Other
+ 0.005071978   Other Hispanic & Non-Hispanic White
+ 0.0002838608   Other Hispanic & Non-Hispanic Black
+ 0.2005293   Other Hispanic & Non-Hispanic Asian
+ 0.2920489   Other Hispanic & Other
+ 0.00214288   Non-Hispanic White & Non-Hispanic Black
+ 0.1631638   Non-Hispanic White & Non-Hispanic Asian
+ 0.8147726   Non-Hispanic White & Other
+ 0.002188129   Non-Hispanic Black & Non-Hispanic Asian
+ 0.5586025   Non-Hispanic Black & Other
+ 0.4994741   Non-Hispanic Asian & Other
+
+By Education
+Joining, by = "DMDEDUC2"
+  DMDEDUC2 counts hypertension         se
+1        1    445    0.6085363 0.04784387
+2        2    450    0.4840685 0.02747644
+3        3    922    0.5446511 0.02664222
+4        4   1256    0.5076154 0.01711399
+5        5   1029    0.4335415 0.01903320
+[1] 0.06273589
+
+ 0.05739107   Less than 9th grade & Some 9-12th grade
+ 0.1892809   Less than 9th grad & High school graduate/GED
+ 0.09245696   Less than 9th grad & Some college or AA degree
+ 0.006579721   Less than 9th grad & College graduate or above
+ 0.1738143   Some 9-12th grade & High school graduate/GED
+ 0.4083387   Some 9-12th grade & Some college or AA degree
+ 0.1474905   Some 9-12th grade & College graduate or above
+ 0.2858338   High school graduate/GED & Some college or AA degree
+ 0.00821932   High school graduate/GED & College graduate or above
+ 0.01622541   Some college or AA degree & College graduate or above
+
+By Marital Status
+Joining, by = "DMDMARTL"
+  DMDMARTL counts hypertension         se
+1        1   2097    0.5079688 0.01157027
+2        2    289    0.7907411 0.03010028
+3        3    442    0.5765143 0.03333839
+4        4    141    0.6111901 0.04815570
+5        5    735    0.3556560 0.02359989
+6        6    398    0.3747459 0.03064307
+[1] 3.803117e-06
+
+ 3.025473e-07   Married & Widowed
+ 0.05274725   Married & Divorced
+ 0.08315697   Married & Separated
+ 1.980304e-05   Married & Never married
+ 0.0008440886   Married & Living with partner
+ 0.0008765792   Widowed & Divorced
+ 0.01213201   Widowed & Separated
+ 7.294428e-08   Widowed & Never married
+ 9.074311e-07   Widowed & Living with partner
+ 0.5623114   Divorced & Separated
+ 4.068291e-05   Divorced & Never married
+ 0.0009361396   Divorced & Living with partner
+ 0.0009602479   Separated & Never married
+ 0.0002547358   Separated & Living with partner
+ 0.6533223   Never married & Living with partner
+
+By Age
+Joining, by = "age_cluster"
+  age_cluster counts hypertension         se
+1           1   1370    0.2461963 0.01620111
+2           2   1766    0.5713835 0.01594837
+3           3    966    0.7531795 0.02872352
+[1] 3.286177e-09
+
+ 1.289709e-09   20 - 39 & 40 - 64
+ 1.333762e-10   20 - 39 & 65 and above
+ 6.119217e-06   40 - 64 & 65 and above
+
+By Family Income to Poverty Ratio
+Joining, by = "FIPR_cluster"
+  FIPR_cluster counts hypertension         se
+1            1    891    0.5013111 0.02101607
+2            2    625    0.5021040 0.02040458
+3            3   2586    0.4920559 0.01084864
+[1] 0.9793859
+
+ 0.9793576   0.00% to 0.99% & 1.00% to 1.49%
+ 0.6360596   0.00% to 0.99% & 1.50% and above
+ 0.6016564   1.00% to 1.49% & 1.50% and above
+
+By BMI
+Joining, by = "BMI_category"
+  BMI_category counts hypertension         se
+1            0   1002    0.3237893 0.01829616
+2            1     57    0.2209069 0.06541090
+3            2   1335    0.4966415 0.01443329
+4            3   1708    0.6080752 0.01313569
+[1] 0.151836
+
+ 0.1481887   Normal weight & Underweight
+ 2.048034e-06   Normal weight & Overweight
+ 7.769002e-09   Normal weight & Obese
+ 0.001447047   Underweight & Overweight
+ 8.493338e-05   Underweight & Obese
+ 1.408874e-05   Overweight & Obese
+
+By Cotinine
+Joining, by = "LBDCOTLC"
+  LBDCOTLC counts hypertension         se
+1        0   1383    0.4972162 0.01921708
+2        1   2719    0.4925677 0.01571624
+[1] 0.8673656
+
+
+By Alcohol
+Joining, by = "ALQ101"
+  ALQ101 counts hypertension         se
+1      1   2850    0.4876752 0.01113449
+2      2   1252    0.5161634 0.02102905
+[1] 0.8673656
+
+
+By Sex
+Joining, by = "RIAGENDR"
+  RIAGENDR counts hypertension         se
+1        1    676    0.5336496 0.03147864
+2        2    669    0.4494737 0.02560599
+[1] 0.0736456
+
+
+By Race/Ethnicity
+Joining, by = "RIDRETH3"
+  RIDRETH3 counts hypertension         se
+1        1    236    0.4253681 0.03746161
+2        2    182    0.3824534 0.03728390
+3        3    475    0.5090098 0.03119161
+4        4    257    0.5596361 0.02773100
+5        6    146    0.4513524 0.05853279
+6        7     49    0.3419761 0.07519786
+[1] 0.390269
+
+
+Pairwise comparisons
+ 0.3843437 	Mexican American & Other Hispanic
+ 0.1792643 	Mexican American & Non-Hispanic White
+ 0.006528109 	Mexican American & Non-Hispanic Black
+ 0.7016855 	Mexican American & Non-Hispanic Asian
+ 0.3443846 	Mexican American & Other
+ 0.01488506   Other Hispanic & Non-Hispanic White
+ 0.001413628   Other Hispanic & Non-Hispanic Black
+ 0.2633109   Other Hispanic & Non-Hispanic Asian
+ 0.6926384   Other Hispanic & Other
+ 0.2841074   Non-Hispanic White & Non-Hispanic Black
+ 0.3631362   Non-Hispanic White & Non-Hispanic Asian
+ 0.1117499   Non-Hispanic White & Other
+ 0.1149315   Non-Hispanic Black & Non-Hispanic Asian
+ 0.02513082   Non-Hispanic Black & Other
+ 0.3139956   Non-Hispanic Asian & Other
+
+By Education
+Joining, by = "DMDEDUC2"
+  DMDEDUC2 counts hypertension         se
+1        1    148    0.6300432 0.05784776
+2        2    145    0.5121333 0.06385843
+3        3    305    0.4945017 0.04597140
+4        4    395    0.4821575 0.03289919
+5        5    352    0.4684811 0.03043195
+[1] 0.1398236
+
+ 0.1355306   Less than 9th grade & Some 9-12th grade
+ 0.07491367   Less than 9th grad & High school graduate/GED
+ 0.06388009   Less than 9th grad & Some college or AA degree
+ 0.01206565   Less than 9th grad & College graduate or above
+ 0.8248362   Some 9-12th grade & High school graduate/GED
+ 0.6430735   Some 9-12th grade & Some college or AA degree
+ 0.5495243   Some 9-12th grade & College graduate or above
+ 0.8574318   High school graduate/GED & Some college or AA degree
+ 0.5533871   High school graduate/GED & College graduate or above
+ 0.7769074   Some college or AA degree & College graduate or above
+
+By Marital Status
+Joining, by = "DMDMARTL"
+  DMDMARTL counts hypertension         se
+1        1    692    0.5216852 0.03262109
+2        2     87    0.7474455 0.08583275
+3        3    142    0.5914243 0.05160057
+4        4     41    0.6024727 0.11306035
+5        5    244    0.3445811 0.04456543
+6        6    139    0.3334905 0.04455032
+[1] 0.01443072
+
+ 0.01045869   Married & Widowed
+ 0.2913891   Married & Divorced
+ 0.5297661   Married & Separated
+ 0.01705496   Married & Never married
+ 0.009097094   Married & Living with partner
+ 0.1410548   Widowed & Divorced
+ 0.3979803   Widowed & Separated
+ 0.001023056   Widowed & Never married
+ 0.000387263   Widowed & Living with partner
+ 0.9364774   Divorced & Separated
+ 0.002908486   Divorced & Never married
+ 0.006935334   Divorced & Living with partner
+ 0.05446651   Separated & Never married
+ 0.05780075   Separated & Living with partner
+ 0.8360788   Never married & Living with partner
+
+By Age
+Joining, by = "age_cluster"
+  age_cluster counts hypertension         se
+1           1    457    0.2361189 0.01881950
+2           2    570    0.5603622 0.03804837
+3           3    318    0.7899426 0.03545250
+[1] 2.2735e-05
+
+ 1.602342e-05   20 - 39 & 40 - 64
+ 7.981756e-09   20 - 39 & 65 and above
+ 9.612627e-05   40 - 64 & 65 and above
+
+By Family Income to Poverty Ratio
+Joining, by = "FIPR_cluster"
+  FIPR_cluster counts hypertension         se
+1            1    267    0.4657048 0.03666189
+2            2    219    0.4798148 0.05881362
+3            3    859    0.4964739 0.02518735
+[1] 0.8666185
+
+ 0.8664321   0.00% to 0.99% & 1.00% to 1.49%
+ 0.5329787   0.00% to 0.99% & 1.50% and above
+ 0.7988457   1.00% to 1.49% & 1.50% and above
+
+By BMI
+Joining, by = "BMI_category"
+  BMI_category counts hypertension         se
+1            0    317    0.3610077 0.02835351
+2            1     17    0.2722817 0.09987165
+3            2    454    0.4758653 0.03518593
+4            3    557    0.5776122 0.03101479
+[1] 0.3433304
+
+ 0.3405998   Normal weight & Underweight
+ 0.008991816   Normal weight & Overweight
+ 0.0003172692   Normal weight & Obese
+ 0.07896976   Underweight & Overweight
+ 0.01788227   Underweight & Obese
+ 0.05189237   Overweight & Obese
+
+By Cotinine
+Joining, by = "LBDCOTLC"
+  LBDCOTLC counts hypertension         se
+1        0    455    0.5173334 0.03619496
+2        1    890    0.4749742 0.02867978
+[1] 0.4272734
+
+
+By Alcohol
+Joining, by = "ALQ101"
+  ALQ101 counts hypertension         se
+1      1    950    0.4844386 0.02231617
+2      2    395    0.5125014 0.02864946
+[1] 0.4272734
+
+
+By Sex
+Joining, by = "RIAGENDR"
+  RIAGENDR counts hypertension         se
+1        1    676    0.5339813 0.03415983
+2        2    668    0.4494825 0.02526251
+[1] 0.08199201
+
+
+By Race/Ethnicity
+Joining, by = "RIDRETH3"
+  RIDRETH3 counts hypertension         se
+1        1    236    0.4222567 0.04101687
+2        2    182    0.3768408 0.03512366
+3        3    475    0.5096990 0.03101196
+4        4    257    0.5580865 0.03008083
+5        6    146    0.4600781 0.05838770
+6        7     48    0.3666002 0.07790304
+[1] 0.3753924
+
+
+Pairwise comparisons
+ 0.3692618 	Mexican American & Other Hispanic
+ 0.1658928 	Mexican American & Non-Hispanic White
+ 0.01251312 	Mexican American & Non-Hispanic Black
+ 0.6059579 	Mexican American & Non-Hispanic Asian
+ 0.5642883 	Mexican American & Other
+ 0.007083716   Other Hispanic & Non-Hispanic White
+ 0.0009390903   Other Hispanic & Non-Hispanic Black
+ 0.15104   Other Hispanic & Non-Hispanic Asian
+ 0.9223171   Other Hispanic & Other
+ 0.3280134   Non-Hispanic White & Non-Hispanic Black
+ 0.4174184   Non-Hispanic White & Non-Hispanic Asian
+ 0.1654102   Non-Hispanic White & Other
+ 0.1647605   Non-Hispanic Black & Non-Hispanic Asian
+ 0.04527977   Non-Hispanic Black & Other
+ 0.3963861   Non-Hispanic Asian & Other
+
+By Education
+Joining, by = "DMDEDUC2"
+  DMDEDUC2 counts hypertension         se
+1        1    148    0.6500078 0.05671147
+2        2    145    0.4869669 0.05890223
+3        3    305    0.5086096 0.05457858
+4        4    394    0.4980887 0.03346799
+5        5    352    0.4504897 0.03204005
+[1] 0.04324721
+
+ 0.03983834   Less than 9th grade & Some 9-12th grade
+ 0.08933481   Less than 9th grad & High school graduate/GED
+ 0.05876799   Less than 9th grad & Some college or AA degree
+ 0.00241223   Less than 9th grad & College graduate or above
+ 0.7891189   Some 9-12th grade & High school graduate/GED
+ 0.8506476   Some 9-12th grade & Some college or AA degree
+ 0.5785528   Some 9-12th grade & College graduate or above
+ 0.8907285   High school graduate/GED & Some college or AA degree
+ 0.2617275   High school graduate/GED & College graduate or above
+ 0.3679131   Some college or AA degree & College graduate or above
+
+By Marital Status
+Joining, by = "DMDMARTL"
+  DMDMARTL counts hypertension         se
+1        1    692    0.5277697 0.03430387
+2        2     87    0.7647871 0.06760888
+3        3    142    0.5853808 0.05443498
+4        4     41    0.6029936 0.10817051
+5        5    244    0.3331252 0.04713587
+6        6    138    0.3215048 0.04586477
+[1] 0.003822715
+
+ 0.002180044   Married & Widowed
+ 0.4239109   Married & Divorced
+ 0.5447917   Married & Separated
+ 0.01063336   Married & Never married
+ 0.007839912   Married & Living with partner
+ 0.05587217   Widowed & Divorced
+ 0.2727151   Widowed & Separated
+ 0.0001436679   Widowed & Never married
+ 8.805098e-05   Widowed & Living with partner
+ 0.8960412   Divorced & Separated
+ 0.003531472   Divorced & Never married
+ 0.008376195   Divorced & Living with partner
+ 0.03649622   Separated & Never married
+ 0.02819624   Separated & Living with partner
+ 0.8428937   Never married & Living with partner
+
+By Age
+Joining, by = "age_cluster"
+  age_cluster counts hypertension         se
+1           1    457    0.2399864 0.02116105
+2           2    569    0.5611700 0.04197365
+3           3    318    0.7867996 0.03441599
+[1] 6.297901e-05
+
+ 4.699707e-05   20 - 39 & 40 - 64
+ 7.998978e-09   20 - 39 & 65 and above
+ 0.0002689602   40 - 64 & 65 and above
+
+By Family Income to Poverty Ratio
+Joining, by = "FIPR_cluster"
+  FIPR_cluster counts hypertension         se
+1            1    267    0.4552257 0.03778736
+2            2    219    0.4749793 0.05686713
+3            3    858    0.4991119 0.02606018
+[1] 0.8172284
+
+ 0.8169688   0.00% to 0.99% & 1.00% to 1.49%
+ 0.3953992   0.00% to 0.99% & 1.50% and above
+ 0.7007683   1.00% to 1.49% & 1.50% and above
+
+By BMI
+Joining, by = "BMI_category"
+  BMI_category counts hypertension         se
+1            0    316    0.3506174 0.02742164
+2            1     17    0.2678941 0.09822872
+3            2    454    0.4799597 0.03561787
+4            3    557    0.5787518 0.03261331
+[1] 0.3297156
+
+ 0.3269058   Normal weight & Underweight
+ 0.004264964   Normal weight & Overweight
+ 0.0002468229   Normal weight & Obese
+ 0.05304615   Underweight & Overweight
+ 0.01537259   Underweight & Obese
+ 0.05564854   Overweight & Obese
+
+By Cotinine
+Joining, by = "LBDCOTLC"
+  LBDCOTLC counts hypertension         se
+1        0    455    0.5133424 0.03411260
+2        1    889    0.4758448 0.03205261
+[1] 0.4885397
+
+
+By Alcohol
+Joining, by = "ALQ101"
+  ALQ101 counts hypertension         se
+1      1    949    0.4801748 0.02295488
+2      2    395    0.5276259 0.02949220
+[1] 0.4885397

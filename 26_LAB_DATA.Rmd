@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library(nhanesA)
+library(rvest)
+```
+
+
+
+```{r}
+lab_tables_ref_df = read_html("https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=Laboratory&CycleBeginYear=2017") %>% 
+  html_nodes("table") %>% 
+  .[[1]] %>% 
+  html_table(fill = TRUE) %>% 
+  mutate(table_name = str_replace(string = `Doc File`, pattern = '_J Doc', replacement = '') )
+
+lab_tables_ref_df %>% 
+  select(`Data File Name`, table_name)
+```
+
+
+```{r}
+for(tname in lab_tables_ref_df$table_name){
+  print(tname)
+  tables = nhanesSearchTableNames(tname)
+  print(tables)
+  print("------------------------------------------------------")
+}
+```
+
+```{r}
+
+nhanesSearchTableNames('LAB')
+
+```
+

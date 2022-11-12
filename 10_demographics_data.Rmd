@@ -1,0 +1,135 @@
+---
+title: "NHANES Data Library"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library(nhanesA)
+```
+
+```{r}
+nhanesSearchTableNames('DEMO')
+```
+
+
+# Demographics table   
+
+## How are these tables named   
+
+1. All the demographics data are stored in a table that has `DEMO` in its name. There is also an added alphabet that defines the year of survey. For example, the very first NHANES demo table is just `DEMO` and the survey year is 1999-2000. The subsequent 2 year window survey data for the year 2001-2002 is `DEMO_B`. Here is a quick reference   
+
+```{r}
+table_name = c('DEMO','DEMO_B','DEMO_C','DEMO_D','DEMO_E','DEMO_F','DEMO_G','DEMO_H','DEMO_I','DEMO_J','P_DEMO')
+
+time_frame = c('1999-2000','2001-2002','2003-2004','2005-2006','2007-2008','2009-2010','2011-2012','2013-2014','2015-2016','2017-2018','PrePandemic')
+demo_ref_df = data.frame(table_name = table_name,
+                         time_frame = time_frame)
+demo_ref_df
+```
+
+
+```{r}
+nhanesSearchTableNames('DEMO')
+```
+
+```{r}
+
+DEMO_19992000 = nhanes('DEMO') %>% mutate(survey_start = 1999, survey_end = 2000, survey_group = '1999-2000')
+DEMO_20012002 = nhanes('DEMO_B') %>% mutate(survey_start = 2001, survey_end = 2002, survey_group = '2001-2002')
+DEMO_20032004 = nhanes('DEMO_C') %>% mutate(survey_start = 2003, survey_end = 2004, survey_group = '2003-2004')
+DEMO_20052006 = nhanes('DEMO_D') %>% mutate(survey_start = 2005, survey_end = 2006, survey_group = '2005-2006')
+DEMO_20072008 = nhanes('DEMO_E') %>% mutate(survey_start = 2007, survey_end = 2008, survey_group = '2007-2008')
+DEMO_20092010 = nhanes('DEMO_F') %>% mutate(survey_start = 2009, survey_end = 2010, survey_group = '2009-2010')
+DEMO_20112012 = nhanes('DEMO_G') %>% mutate(survey_start = 2011, survey_end = 2012, survey_group = '2011-2012')
+DEMO_20132014 = nhanes('DEMO_H') %>% mutate(survey_start = 2013, survey_end = 2014, survey_group = '2013-2014')
+DEMO_20152016 = nhanes('DEMO_I') %>% mutate(survey_start = 2015, survey_end = 2016, survey_group = '2015-2016')
+DEMO_20172018 = nhanes('DEMO_J') %>% mutate(survey_start = 2017, survey_end = 2018, survey_group = '2017-2018')
+
+```
+
+
+```{r}
+sum(names(DEMO_20172018) %in% names(DEMO_20112012))
+sum(names(DEMO_19992000) %in% names(DEMO_20172018))
+
+column_name = c(names(DEMO_19992000),
+                names(DEMO_20012002),
+                names(DEMO_20032004),
+                names(DEMO_20052006),
+                names(DEMO_20072008),
+                names(DEMO_20092010),
+                names(DEMO_20112012),
+                names(DEMO_20132014),
+                names(DEMO_20152016),
+                names(DEMO_20172018)
+                )
+survey_years = c(rep('1999-2000',length(names(DEMO_19992000))),
+                 rep('2001-2002',length(names(DEMO_20012002))),
+                 rep('2003-2004',length(names(DEMO_20032004))),
+                 rep('2005-2006',length(names(DEMO_20052006))),
+                 rep('2007-2008',length(names(DEMO_20072008))),
+                 rep('2009-2010',length(names(DEMO_20092010))),
+                 rep('2011-2012',length(names(DEMO_20112012))),
+                 rep('2013-2014',length(names(DEMO_20132014))),
+                 rep('2015-2016',length(names(DEMO_20152016))),
+                 rep('2017-2018',length(names(DEMO_20172018)))
+                 )
+
+demo_columns_df = data.frame(column_name = column_name,
+                             survey_years = survey_years)
+
+demo_columns_overtime = demo_columns_df %>% 
+  filter(survey_years != '1999-2000') %>% 
+  mutate(value = 1) %>% 
+  pivot_wider(names_from = survey_years, values_from = value)
+
+```
+
+
+```{r chart, fig.width=2, fig.height=5}
+demo_columns_df %>% 
+  filter(survey_years != '1999-2000') %>% 
+  mutate(value = 1) %>% 
+  ggplot()+
+  aes(x = survey_years, y = column_name, group = column_name)+
+  geom_line()+
+  geom_point()+
+  theme_bw()
+```
+
+
+```{r}
+current_avail_col_df = demo_columns_overtime %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(current_field = ifelse(`2017-2018` == 0, 0, 1) ,
+         data_points_available = ifelse(current_field == 0, 0, 
+                                        `2001-2002`+
+                                          `2003-2004`+
+                                          `2005-2006`+
+                                          `2007-2008`+
+                                          `2009-2010`+
+                                          `2011-2012`+
+                                          `2013-2014`+
+                                          `2015-2016`+
+                                          `2017-2018` ))
+
+current_avail_col_df
+```
+
+```{r}
+current_avail_col_df %>% filter(current_field == 1) %>% arrange(data_points_available)
+```
+
+
+```{r}
+save.image(file = "demo.RData")
+```
+
+```{r}
+load(file = "demo.RData")
+```
+

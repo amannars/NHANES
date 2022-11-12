@@ -1,0 +1,123 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library(nhanesA)
+```
+
+
+```{r}
+nhanesSearchTableNames('BMX')
+```
+
+```{r}
+bmx_table_name = c('BMX','BMX_B','BMX_C','BMX_D','BMX_E','BMX_F','BMX_G','BMX_H','BMX_I','BMX_J','P_BMX')
+
+time_frame = c('1999-2000','2001-2002','2003-2004','2005-2006','2007-2008','2009-2010','2011-2012','2013-2014','2015-2016','2017-2018','PrePandemic')
+bmx_ref_df = data.frame(table_name = bmx_table_name,
+                         time_frame = time_frame)
+bmx_ref_df
+```
+
+
+
+
+
+```{r}
+
+BMX_19992000 = nhanes('BMX') %>% mutate(survey_start = 1999, survey_end = 2000, survey_group = '1999-2000')
+BMX_20012002 = nhanes('BMX_B') %>% mutate(survey_start = 2001, survey_end = 2002, survey_group = '2001-2002')
+BMX_20032004 = nhanes('BMX_C') %>% mutate(survey_start = 2003, survey_end = 2004, survey_group = '2003-2004')
+BMX_20052006 = nhanes('BMX_D') %>% mutate(survey_start = 2005, survey_end = 2006, survey_group = '2005-2006')
+BMX_20072008 = nhanes('BMX_E') %>% mutate(survey_start = 2007, survey_end = 2008, survey_group = '2007-2008')
+BMX_20092010 = nhanes('BMX_F') %>% mutate(survey_start = 2009, survey_end = 2010, survey_group = '2009-2010')
+BMX_20112012 = nhanes('BMX_G') %>% mutate(survey_start = 2011, survey_end = 2012, survey_group = '2011-2012')
+BMX_20132014 = nhanes('BMX_H') %>% mutate(survey_start = 2013, survey_end = 2014, survey_group = '2013-2014')
+BMX_20152016 = nhanes('BMX_I') %>% mutate(survey_start = 2015, survey_end = 2016, survey_group = '2015-2016')
+BMX_20172018 = nhanes('BMX_J') %>% mutate(survey_start = 2017, survey_end = 2018, survey_group = '2017-2018')
+
+```
+
+```{r}
+sum(names(BMX_20172018) %in% names(BMX_20112012))
+sum(names(BMX_19992000) %in% names(BMX_20172018))
+
+column_name = c(names(BMX_19992000),
+                names(BMX_20012002),
+                names(BMX_20032004),
+                names(BMX_20052006),
+                names(BMX_20072008),
+                names(BMX_20092010),
+                names(BMX_20112012),
+                names(BMX_20132014),
+                names(BMX_20152016),
+                names(BMX_20172018)
+                )
+survey_years = c(rep('1999-2000',length(names(BMX_19992000))),
+                 rep('2001-2002',length(names(BMX_20012002))),
+                 rep('2003-2004',length(names(BMX_20032004))),
+                 rep('2005-2006',length(names(BMX_20052006))),
+                 rep('2007-2008',length(names(BMX_20072008))),
+                 rep('2009-2010',length(names(BMX_20092010))),
+                 rep('2011-2012',length(names(BMX_20112012))),
+                 rep('2013-2014',length(names(BMX_20132014))),
+                 rep('2015-2016',length(names(BMX_20152016))),
+                 rep('2017-2018',length(names(BMX_20172018)))
+                 )
+
+bmx_columns_df = data.frame(column_name = column_name,
+                             survey_years = survey_years)
+
+bmx_columns_overtime = bmx_columns_df %>% 
+  filter(survey_years != '1999-2000') %>% 
+  mutate(value = 1) %>% 
+  pivot_wider(names_from = survey_years, values_from = value)
+
+```
+
+
+```{r chart, fig.width=2, fig.height=5}
+bmx_columns_df %>% 
+  filter(survey_years != '1999-2000') %>% 
+  mutate(value = 1) %>% 
+  ggplot()+
+  aes(x = survey_years, y = column_name, group = column_name)+
+  geom_line()+
+  geom_point()+
+  theme_bw()
+```
+
+
+
+
+
+```{r}
+current_avail_bmx_col_df = bmx_columns_overtime %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(current_field = ifelse(`2017-2018` == 0, 0, 1) ,
+         data_points_available = ifelse(current_field == 0, 0, 
+                                        `2001-2002`+
+                                          `2003-2004`+
+                                          `2005-2006`+
+                                          `2007-2008`+
+                                          `2009-2010`+
+                                          `2011-2012`+
+                                          `2013-2014`+
+                                          `2015-2016`+
+                                          `2017-2018` ))
+
+current_avail_bmx_col_df
+```
+
+
+```{r}
+current_avail_bmx_col_df %>% filter(current_field == 1) %>% arrange(data_points_available)
+```
+
+

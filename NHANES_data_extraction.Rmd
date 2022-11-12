@@ -1,0 +1,162 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+How does using a categorical variable for continous variable? How does it affect the predictability and inference?
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidymodels)
+library(tidyverse)
+library(magrittr)
+library(RNHANES)
+library(skimr)
+library(GGally)
+```
+
+Downloading the data 
+```{r}
+#Download demographic data
+DEMO_I = nhanes_load_data("DEMO", "2007-2008", demographics = TRUE)
+
+nhanes_load_data("EPH", "2007-2008")
+
+write.csv(x = DEMO_I, file =  "DEMO_I.csv", row.names = FALSE)
+
+DEMO_I %<>% 
+  select(SEQN, SDDSRVYR, RIDSTATR, RIAGENDR, RIDAGEYR, RIDRETH3, DMDEDUC2, DMDMARTL, DMDHSEDU,  WTINT2YR, WTMEC2YR, SDMVPSU, SDMVSTRA, INDFMPIR)
+
+skim(DEMO_I)
+
+phenols <- nhanes_load_data("EPH", "2007-2008", demographics = TRUE)
+read.csv(file = "https://www.cdc.gov/nchs/rands/files/RANDS4.csv") %>% 
+  mutate(Source = '')
+```
+
+
+
+```{r}
+# 1. Remove rows with at least one NA
+DEMO_I %<>% 
+  drop_na()
+
+# 2. Convert age to categorical variable & convert FIPR to categorical variable & the rest
+
+DEMO_I %<>% 
+  mutate(age_cluster = (kmeans(x = RIDAGEYR, centers = 3))$cluster,
+         FIPR_cluster = (kmeans(x = INDFMPIR, centers = 3))$cluster,
+         RIDAGEYR = ifelse(RIDAGEYR <= 80, RIDAGEYR, 80),
+         DMDEDUC2 = ifelse(DMDEDUC2 <= 5, DMDEDUC2, 5)) %>% 
+  filter(RIAGENDR %in% c(1,2),
+         RIDAGEYR >= 20)
+
+skim(DEMO_I)
+
+```
+
+
+
+
+# Alcohol Data   
+
+```{r}
+ALQ_I = nhanes_load_data("ALQ_I", "2015-2016", demographics = FALSE)
+write.csv(x = ALQ_I, file = "ALQ_I.csv",row.names = FALSE)
+skim(ALQ_I)
+```
+
+
+```{r}
+
+ALQ_data = DEMO_I %>% 
+  left_join(ALQ_I %>% select(SEQN, ALQ130), by = "SEQN")
+
+```
+
+
+```{r}
+ALQ_data %>% 
+  select(age_cluster, FIPR_cluster, ALQ130) %>% 
+  ggpairs()
+```
+
+
+
+```{r}
+ALQ_data %>% 
+  drop_na() %>% 
+  filter(ALQ130 <= 100) %>% 
+  select(age_cluster, FIPR_cluster, ALQ130) %>% 
+  mutate(age_cluster = factor(age_cluster, levels = c(1,2,3),ordered = TRUE),
+         FIPR_cluster = factor(FIPR_cluster, levels = c(1,2,3),ordered = TRUE)) %>% 
+  ggpairs()
+```
+
+```{r}
+ALQ_data %<>%
+  filter(ALQ130 < 100) %>% 
+  mutate(ALQ130 = ifelse(is.na(ALQ130)==TRUE,0,ALQ130))
+```
+
+```{r}
+glimpse(ALQ_data)
+```
+
+
+```{r}
+ALQ_data %<>% select(-SEQN, -WTINT2YR, -WTMEC2YR) 
+set.seed(46)
+# Put 3/4 of the data into the training set 
+data_split <- initial_split(ALQ_data, prop = 3/4)
+
+# Create data frames for the two sets:
+train_data <- training(data_split)
+test_data  <- testing(data_split)
+```
+
+
+```{r}
+#Download albumin data
+#ALB_CR_I = nhanes_load_data("ALB_CR", "2015-2016", demographics = FALSE)
+
+#Download smoking (cotinine) data
+#COT_I = nhanes_load_data("COT", "2015-2016", demographics = FALSE)
+
+#Download Blood Pressure & Cholesterol (BPQ_I) data
+#BPQ_I = nhanes_load_data("BPQ_I", "2015-2016", demographics = FALSE)
+
+#Download Blood Pressure measurement (BPX_I) data
+#BPX_I = nhanes_load_data("BPX_I", "2015-2016", demographics = FALSE)
+
+#Download Body Measures (BMX_I) data
+#BMX_I = nhanes_load_data("BMX", "2015-2016", demographics = FALSE)
+
+#dowload alcohol data
+#ALQ = nhanes_load_data("ALQ", "2015-2016", demographics = FALSE)
+
+#dowload arsenic data
+#UAS = nhanes_load_data("UAS", "2015-2016", demographics = FALSE)
+
+#Download arsenic total data
+#UTAS_I = nhanes_load_data("UTAS_I", "2015-2016", demographics = FALSE)
+
+#dowload mercury data
+#UHG = nhanes_load_data("UHG", "2015-2016", demographics = FALSE)
+
+#Download urine heavy metal data
+#UMS_I = nhanes_load_data("UMS_I", "2015-2016", demographics = FALSE)
+```
+
+```{r}
+# SEQN - Respondent Sequence Number
+# LBXCOT - Cotinine, Serum (ng/mL)
+# LBDCOTLC - Cotinine, Serum Comment Code
+# LBXHCT - Hydroxycotinine, Serum (ng/mL)
+# LBDHCTLC - Hydroxycotinine, Serum Comment Code
+# names(DEMO_I)[c(1,2,3,4,5,8,17,18,40,41,42,43,44,47)]
+
+nhanes_an
+```
+
